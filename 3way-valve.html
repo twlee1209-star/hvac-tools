@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="공조기 제어용 3방밸브 유량계수(Cv, Kv) 및 밸브 권한 계산 도구.">
+    <title>3방밸브 유량계수(Cv) 계산기 | HVAC 엔지니어링 툴</title>
+    <style>
+        :root { --primary-color: #0284c7; --secondary-color: #0369a1; --bg-color: #f8fafc; --text-color: #1e293b; --card-bg: #ffffff; --border-color: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+        header { background-color: var(--primary-color); color: white; padding: 2rem 1rem; text-align: center; }
+        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .calculator-card { background: var(--card-bg); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 3rem; border: 1px solid var(--border-color); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+        .input-group { margin-bottom: 1.2rem; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.95rem; }
+        .input-group input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        .result-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+        @media (max-width: 768px) { .result-container { grid-template-columns: 1fr; } }
+        .result-box { background-color: #f0f9ff; border-left: 4px solid var(--primary-color); padding: 1.2rem; border-radius: 4px; }
+        .result-box h3 { color: var(--secondary-color); font-size: 0.95rem; margin-bottom: 0.3rem; }
+        .result-value { font-size: 1.8rem; font-weight: bold; color: var(--primary-color); }
+        .content-section { background: var(--card-bg); padding: 2.5rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .content-section h2 { font-size: 1.5rem; margin-bottom: 1.2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        .content-section p { margin-bottom: 1rem; font-size: 0.95rem; }
+        nav { background: #fff; padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: center; overflow-x: auto; white-space: nowrap; }
+        nav a { color: var(--primary-color); font-weight: 600; text-decoration: none; margin: 0 10px; font-size: 0.95rem; }
+        footer { margin-top: 4rem; padding: 2rem; text-align: center; color: #64748b; font-size: 0.9rem; border-top: 1px solid var(--border-color); }
+        footer a { color: var(--primary-color); text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">수배관 계산기</a>
+        <a href="steam-coil.html">스팀코일 계산기</a>
+        <a href="3way-valve.html">3방밸브 계산기</a>
+        <a href="privacy.html">개인정보처리방침</a>
+        <a href="terms.html">이용약관</a>
+    </nav>
+
+    <header>
+        <h1>제어용 3방밸브 유량계수(Cv) 계산기</h1>
+        <p>공조기 제어 밸브 용량 산정 및 밸브 권한 검토 도구</p>
+    </header>
+
+    <div class="container">
+        <main class="calculator-card">
+            <div class="grid-2">
+                <div class="input-group">
+                    <label for="flowRate">설계 유량 (Q) - m³/h</label>
+                    <input type="number" id="flowRate" placeholder="예: 15.5" oninput="calculateValve()">
+                </div>
+                <div class="input-group">
+                    <label for="specificGravity">유체 비중 (G) - 물=1.0</label>
+                    <input type="number" id="specificGravity" value="1.0" oninput="calculateValve()">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="input-group">
+                    <label for="valveDrop">설계 밸브 차압 (ΔPv) - bar</label>
+                    <input type="number" id="valveDrop" value="0.3" oninput="calculateValve()">
+                </div>
+                <div class="input-group">
+                    <label for="coilDrop">코일 및 제어구간 차압 (ΔPc) - bar</label>
+                    <input type="number" id="coilDrop" value="0.2" oninput="calculateValve()">
+                </div>
+            </div>
+
+            <div class="result-container">
+                <div class="result-box">
+                    <h3>필요 유량계수 (Kv)</h3>
+                    <div class="result-value" id="resultKv">0.00</div>
+                </div>
+                <div class="result-box">
+                    <h3>필요 유량계수 (Cv)</h3>
+                    <div class="result-value" id="resultCv">0.00</div>
+                </div>
+                <div class="result-box">
+                    <h3>밸브 권한 (Authority)</h3>
+                    <div class="result-value"><span id="resultAuth">0.0</span>%</div>
+                </div>
+            </div>
+        </main>
+
+        <section class="content-section">
+            <h2>제어 밸브 권한 개요</h2>
+            <p>정밀한 온도 제어를 위해서는 적절한 밸브 권한(일반적으로 0.5 이상 권장)을 확보하는 것이 중요합니다.</p>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 디지털 노마드 엔지니어링 툴. All rights reserved.</p>
+        <div style="margin-top: 10px;">
+            <a href="terms.html">이용약관</a> | <a href="privacy.html">개인정보처리방침</a>
+        </div>
+    </footer>
+
+    <script>
+        function calculateValve() {
+            const Q = parseFloat(document.getElementById('flowRate').value);
+            const G = parseFloat(document.getElementById('specificGravity').value);
+            const dpV = parseFloat(document.getElementById('valveDrop').value);
+            const dpC = parseFloat(document.getElementById('coilDrop').value);
+
+            const resultKv = document.getElementById('resultKv');
+            const resultCv = document.getElementById('resultCv');
+            const resultAuth = document.getElementById('resultAuth');
+
+            if (isNaN(Q) || isNaN(G) || isNaN(dpV) || isNaN(dpC) || Q <= 0 || dpV <= 0) {
+                resultKv.textContent = "0.00";
+                resultCv.textContent = "0.00";
+                resultAuth.textContent = "0.0";
+                return;
+            }
+
+            const Kv = Q * Math.sqrt(G / dpV);
+            const Cv = 1.156 * Kv;
+            const authority = (dpV / (dpV + dpC)) * 100;
+
+            resultKv.textContent = Kv.toFixed(2);
+            resultCv.textContent = Cv.toFixed(2);
+            resultAuth.textContent = authority.toFixed(1);
+        }
+        calculateValve();
+    </script>
+</body>
+</html>

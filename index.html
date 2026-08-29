@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="공조 및 위생 배관 설계를 위한 수배관 관경, 마찰손실, 유속 계산 도구.">
+    <title>수배관 관경 계산기 | HVAC 엔지니어링 툴</title>
+    <style>
+        :root { --primary-color: #0284c7; --secondary-color: #0369a1; --bg-color: #f8fafc; --text-color: #1e293b; --card-bg: #ffffff; --border-color: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+        header { background-color: var(--primary-color); color: white; padding: 2rem 1rem; text-align: center; }
+        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .calculator-card { background: var(--card-bg); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 3rem; border: 1px solid var(--border-color); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+        .input-group { margin-bottom: 1.2rem; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.95rem; }
+        .input-group input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        .input-group input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(2,132,199,0.1); }
+        .result-container { margin-top: 1.5rem; background-color: #f0f9ff; border-left: 4px solid var(--primary-color); padding: 1.2rem; border-radius: 4px; }
+        .result-container h3 { color: var(--secondary-color); font-size: 1rem; margin-bottom: 0.3rem; }
+        .result-value { font-size: 2rem; font-weight: bold; color: var(--primary-color); }
+        .content-section { background: var(--card-bg); padding: 2.5rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .content-section h2 { font-size: 1.5rem; margin-bottom: 1.2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        .content-section p { margin-bottom: 1rem; font-size: 0.95rem; }
+        nav { background: #fff; padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: center; overflow-x: auto; white-space: nowrap; }
+        nav a { color: var(--primary-color); font-weight: 600; text-decoration: none; margin: 0 10px; font-size: 0.95rem; }
+        footer { margin-top: 4rem; padding: 2rem; text-align: center; color: #64748b; font-size: 0.9rem; border-top: 1px solid var(--border-color); }
+        footer a { color: var(--primary-color); text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">수배관 계산기</a>
+        <a href="steam-coil.html">스팀코일 계산기</a>
+        <a href="3way-valve.html">3방밸브 계산기</a>
+        <a href="privacy.html">개인정보처리방침</a>
+        <a href="terms.html">이용약관</a>
+    </nav>
+
+    <header>
+        <h1>수배관 관경 및 유속 계산기</h1>
+        <p>유량에 따른 최적의 배관 구경과 유속을 간편하게 산출하세요</p>
+    </header>
+
+    <div class="container">
+        <main class="calculator-card">
+            <div class="grid-2">
+                <div class="input-group">
+                    <label for="flowRate">순환 유량 (CMH) - m³/h</label>
+                    <input type="number" id="flowRate" placeholder="예: 50" oninput="calculatePipe()">
+                </div>
+                <div class="input-group">
+                    <label for="pipeDiameter">배관 내경 (mm)</label>
+                    <input type="number" id="pipeDiameter" placeholder="예: 100" oninput="calculatePipe()">
+                </div>
+            </div>
+
+            <div class="result-container">
+                <h3>산출 유속</h3>
+                <div class="result-value"><span id="resultVelocity">0.00</span> <span style="font-size:1.2rem;">m/s</span></div>
+            </div>
+        </main>
+
+        <section class="content-section">
+            <h2>수배관 설계 기초 가이드</h2>
+            <p>공조 및 냉난방 설비 배관 설계 시 적정 유속을 유지하는 것은 소음 방지와 마찰 손실 저감을 위해 매우 중요합니다. 일반적인 냉수/온수 배관의 허용 유속은 1.0 m/s ~ 2.5 m/s 범위 내에서 선정하는 것이 일반적입니다.</p>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 디지털 노마드 엔지니어링 툴. All rights reserved.</p>
+        <div style="margin-top: 10px;">
+            <a href="terms.html">이용약관</a> | <a href="privacy.html">개인정보처리방침</a>
+        </div>
+    </footer>
+
+    <script>
+        function calculatePipe() {
+            const Q = parseFloat(document.getElementById('flowRate').value);
+            const D = parseFloat(document.getElementById('pipeDiameter').value);
+            const res = document.getElementById('resultVelocity');
+
+            if (isNaN(Q) || isNaN(D) || Q <= 0 || D <= 0) {
+                res.textContent = "0.00";
+                return;
+            }
+            // 유속 v = (4 * Q) / (3600 * pi * (D/1000)^2)
+            const area = Math.PI * Math.pow(D / 2000, 2);
+            const velocity = (Q / 3600) / area;
+            res.textContent = velocity.toFixed(2);
+        }
+    </script>
+</body>
+</html>
