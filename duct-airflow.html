@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>덕트 풍량 및 퀵 커플러 - HVAC Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+    <nav class="bg-white border-b border-slate-200 py-4 px-6"><a href="index.html" class="text-blue-600 font-semibold">&larr; 메인으로 돌아가기</a></nav>
+    <main class="max-w-4xl mx-auto px-4 py-10 flex-grow w-full">
+        <h1 class="text-2xl font-bold mb-6">덕트 풍량 산출 및 체결구 사양</h1>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">덕트 단면적 (㎡)</label>
+                <input type="number" id="area" class="w-full border border-slate-300 rounded-lg p-2" value="0.5">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">풍속 (m/s)</label>
+                <input type="number" id="velocity" class="w-full border border-slate-300 rounded-lg p-2" value="8">
+            </div>
+            <button onclick="calcDuct()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700">풍량 계산</button>
+            <div id="ductResult" class="mt-4 p-4 bg-slate-100 rounded-lg font-medium text-slate-700">결과가 여기에 표시됩니다.</div>
+        </div>
+        <article class="mt-8 prose text-slate-600 text-sm space-y-2">
+            <h3 class="text-lg font-semibold text-slate-800">네오디움 자석 및 로터리 캠록 덕트 퀵 커플러 메커니즘</h3>
+            <p>본 고안은 덕트 연결 공정을 단축하기 위한 하이브리드 체결구입니다. 네오디움 자석 가이드를 통해 초기 정렬을 유도하고, 1/4 회전 캠록 구조와 실리콘 씰을 적용하여 기밀성을 극대화합니다. (※ 수나사/암나사 구조는 절삭 나사산 가공이 아닌 구조적 삽입 방식을 의미합니다.)</p>
+        </article>
+    </main>
+    <script>
+        function calcDuct() {
+            const area = document.getElementById('area').value;
+            const vel = document.getElementById('velocity').value;
+            const cmm = area * vel * 60;
+            const cmh = cmm * 60;
+            document.getElementById('ductResult').innerText = `산출 풍량: ${cmm.toFixed(1)} CMM (${cmh.toFixed(0)} CMH)`;
+        }
+    </script>
+</body>
+</html>
